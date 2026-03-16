@@ -1,0 +1,597 @@
+import 'package:flutter/material.dart';
+import 'login_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../models/user.dart';
+
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  
+  UserRole _selectedRole = UserRole.doctor; 
+  String? _selectedDepartment;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  final List<String> _departments = [
+    'Cardiology',
+    'Neurology',
+    'Orthopedics',
+    'Pediatrics',
+    'General Medicine',
+    'Dermatology',
+    'Ophthalmology',
+    'ENT',
+    'Gynecology',
+    'Psychiatry',
+  ];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSignup() async {
+    if (_formKey.currentState!.validate()) {
+      // Disable the button to prevent multiple submissions
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
+      // Set loading state to prevent duplicate submissions
+      authProvider.setLoading(true);
+      
+      // Only set hospital_id for roles that require it
+      String? hospitalId;
+      if (_selectedRole == UserRole.doctor || _selectedRole == UserRole.admin) {
+        hospitalId = 'default_hospital'; // This will be handled by backend
+      }
+      
+      await authProvider.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        role: _selectedRole,
+        hospitalId: hospitalId, // Will be null for patient/consultant roles
+        department: _selectedDepartment,
+      );
+
+      if (authProvider.errorMessage == null && authProvider.currentUser != null) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully! Welcome to Clinikx.'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+        );
+        
+        // Force navigation to trigger AuthWrapper
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+          );
+        );
+        
+        
+      } else if (authProvider.errorMessage != null && authProvider.errorMessage!.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage!),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          );
+        );
+      }
+      
+      // Reset loading state
+      authProvider.setLoading(false);
+      
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF0D47A1),
+              Color(0xFF1976D2),
+            ],
+          );
+        ),
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(), // Disable scrolling for the main view
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  );
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Simplified Header - Just the app name
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 32),
+                            child: const Text(
+                              'Clinikx',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1.2,
+                              );
+                            );
+                          );
+                          
+                          // Signup Card - Professional and Compact
+                          Card(
+                            elevation: 15,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            );
+                            child: Container(
+                              width: double.infinity,
+                              constraints: const BoxConstraints(
+                                maxWidth: 380,
+                              );
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.white,
+                                    Colors.grey.shade50,
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                );
+                              );
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min, // Limit the column size
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      const Text(
+                                        'Create Account',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF0D47A1),
+                                        );
+                                        textAlign: TextAlign.center,
+                                      );
+                                      const SizedBox(height: 24),
+                                      
+                                      // Name Field - Compact with fixed height
+                                      Container(
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.3),
+                                          );
+                                        );
+                                        child: TextFormField(
+                                          controller: _nameController,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Full Name',
+                                            prefixIcon: Icon(
+                                              Icons.person_outline,
+                                              color: Color(0xFF1976D2),
+                                              size: 20,
+                                            );
+                                            border: InputBorder.none,
+                                            contentPadding: EdgeInsets.all(14),
+                                            isDense: true,
+                                          );
+                                          style: const TextStyle(fontSize: 15),
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Name required';
+                                            }
+                                            if (value.length < 2) {
+                                              return '2+ characters';
+                                            }
+                                            return null;
+                                          },
+                                        );
+                                      );
+                                      const SizedBox(height: 16),
+                                      
+                                      // Email Field - Compact with fixed height
+                                      Container(
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.3),
+                                          );
+                                        );
+                                        child: TextFormField(
+                                          controller: _emailController,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Email',
+                                            prefixIcon: Icon(
+                                              Icons.email_outlined,
+                                              color: Color(0xFF1976D2),
+                                              size: 20,
+                                            );
+                                            border: InputBorder.none,
+                                            contentPadding: EdgeInsets.all(14),
+                                            isDense: true,
+                                          );
+                                          keyboardType: TextInputType.emailAddress,
+                                          style: const TextStyle(fontSize: 15),
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Email required';
+                                            }
+                                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                                              return 'Invalid email';
+                                            }
+                                            return null;
+                                          },
+                                        );
+                                      );
+                                      const SizedBox(height: 16),
+                                      
+                                      // Phone Field - Compact with fixed height
+                                      Container(
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.3),
+                                          );
+                                        );
+                                        child: TextFormField(
+                                          controller: _phoneController,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Phone',
+                                            prefixIcon: Icon(
+                                              Icons.phone_outlined,
+                                              color: Color(0xFF1976D2),
+                                              size: 20,
+                                            );
+                                            border: InputBorder.none,
+                                            contentPadding: EdgeInsets.all(14),
+                                            isDense: true,
+                                          );
+                                          keyboardType: TextInputType.phone,
+                                          style: const TextStyle(fontSize: 15),
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Phone required';
+                                            }
+                                            if (value.length < 10) {
+                                              return 'Invalid phone';
+                                            }
+                                            return null;
+                                          },
+                                        );
+                                      );
+                                      const SizedBox(height: 16),
+                                      
+                                      // Role Selection - Simplified (Admin or Doctor only) with fixed height
+                                      Container(
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.3),
+                                          );
+                                        );
+                                        child: DropdownButtonFormField<UserRole>(
+                                          value: _selectedRole,
+                                          decoration: const InputDecoration(
+                                            labelText: 'I am a',
+                                            prefixIcon: Icon(
+                                              Icons.work_outline,
+                                              color: Color(0xFF1976D2),
+                                              size: 20,
+                                            );
+                                            border: InputBorder.none,
+                                            contentPadding: EdgeInsets.all(14),
+                                            isDense: true,
+                                          );
+                                          items: const [
+                                            DropdownMenuItem(
+                                              value: UserRole.admin,
+                                              child: Text('Administrator', style: TextStyle(fontSize: 15)),
+                                            );
+                                            DropdownMenuItem(
+                                              value: UserRole.doctor,
+                                              child: Text('Doctor', style: TextStyle(fontSize: 15)),
+                                            );
+                                          ],
+                                          onChanged: (value) {
+                                            if (value != null) {
+                                              setState(() {
+                                                _selectedRole = value;
+                                                _selectedDepartment = null; // Reset department when role changes
+                                              });
+                                            }
+                                          },
+                                          validator: (value) {
+                                            if (value == null) {
+                                              return 'Select role';
+                                            }
+                                            return null;
+                                          },
+                                        );
+                                      );
+                                      const SizedBox(height: 16),
+                                      
+                                      // Department Selection (only for doctors) - Compact with fixed height
+                                      if (_selectedRole == UserRole.doctor)
+                                        Container(
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: Colors.grey.withOpacity(0.3),
+                                            );
+                                          );
+                                          child: DropdownButtonFormField<String>(
+                                            value: _selectedDepartment,
+                                            decoration: const InputDecoration(
+                                              labelText: 'Department',
+                                              prefixIcon: Icon(
+                                                Icons.medical_services_outlined,
+                                                color: Color(0xFF1976D2),
+                                                size: 20,
+                                              );
+                                              border: InputBorder.none,
+                                              contentPadding: EdgeInsets.all(14),
+                                              isDense: true,
+                                            );
+                                            items: _departments.map((dept) {
+                                              return DropdownMenuItem(
+                                                value: dept,
+                                                child: Text(dept, style: const TextStyle(fontSize: 15)),
+                                              );
+                                            }).toList(),
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _selectedDepartment = value;
+                                              });
+                                            },
+                                            validator: (value) {
+                                              if (_selectedRole == UserRole.doctor && 
+                                                  (value == null || value.isEmpty)) {
+                                                return 'Select department';
+                                              }
+                                              return null;
+                                            },
+                                          );
+                                        );
+                                      if (_selectedRole == UserRole.doctor)
+                                        const SizedBox(height: 16),
+                                      
+                                      // Password Field - Compact with fixed height
+                                      Container(
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.3),
+                                          );
+                                        );
+                                        child: TextFormField(
+                                          controller: _passwordController,
+                                          decoration: InputDecoration(
+                                            labelText: 'Password',
+                                            prefixIcon: const Icon(
+                                              Icons.lock_outline,
+                                              color: Color(0xFF1976D2),
+                                              size: 20,
+                                            );
+                                            suffixIcon: IconButton(
+                                              icon: Icon(
+                                                _obscurePassword
+                                                    ? Icons.visibility_off
+                                                    : Icons.visibility,
+                                                color: Colors.grey,
+                                                size: 20,
+                                              );
+                                              onPressed: () {
+                                                setState(() {
+                                                  _obscurePassword = !_obscurePassword;
+                                                });
+                                              },
+                                            );
+                                            border: InputBorder.none,
+                                            contentPadding: const EdgeInsets.all(14),
+                                            isDense: true,
+                                          );
+                                          obscureText: _obscurePassword,
+                                          style: const TextStyle(fontSize: 15),
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Password required';
+                                            }
+                                            if (value.length < 6) {
+                                              return '6+ characters';
+                                            }
+                                            return null;
+                                          },
+                                        );
+                                      );
+                                      const SizedBox(height: 16),
+                                      
+                                      // Confirm Password Field - Compact with fixed height
+                                      Container(
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.3),
+                                          );
+                                        );
+                                        child: TextFormField(
+                                          controller: _confirmPasswordController,
+                                          decoration: InputDecoration(
+                                            labelText: 'Confirm Password',
+                                            prefixIcon: const Icon(
+                                              Icons.lock_outline,
+                                              color: Color(0xFF1976D2),
+                                              size: 20,
+                                            );
+                                            suffixIcon: IconButton(
+                                              icon: Icon(
+                                                _obscureConfirmPassword
+                                                    ? Icons.visibility_off
+                                                    : Icons.visibility,
+                                                color: Colors.grey,
+                                                size: 20,
+                                              );
+                                              onPressed: () {
+                                                setState(() {
+                                                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                                                });
+                                              },
+                                            );
+                                            border: InputBorder.none,
+                                            contentPadding: const EdgeInsets.all(14),
+                                            isDense: true,
+                                          );
+                                          obscureText: _obscureConfirmPassword,
+                                          style: const TextStyle(fontSize: 15),
+                                          validator: (value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Confirm password';
+                                            }
+                                            if (value != _passwordController.text) {
+                                              return 'Passwords mismatch';
+                                            }
+                                            return null;
+                                          },
+                                        );
+                                      );
+                                      const SizedBox(height: 24),
+                                      
+                                      // Signup Button - Elegant
+                                      Container(
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFF1976D2),
+                                              Color(0xFF0D47A1),
+                                            ],
+                                          );
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF1976D2).withOpacity(0.3),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 3),
+                                            );
+                                          ],
+                                        );
+                                        child: Consumer<AuthProvider>(
+                                          builder: (context, authProvider, child) {
+                                            return ElevatedButton(
+                                              onPressed: authProvider.isLoading
+                                                  ? null
+                                                  : _handleSignup,
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.transparent,
+                                                shadowColor: Colors.transparent,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                );
+                                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                              );
+                                              child: authProvider.isLoading
+                                                  ? const SizedBox(
+                                                      width: 20,
+                                                      height: 20,
+                                                      child: CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                      );
+                                                    )
+                                                  : const Text(
+                                                      'Create Account',
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Colors.white,
+                                                      );
+                                                    );
+                                            );
+                                          },
+                                        );
+                                      );
+                                      const SizedBox(height: 20),
+                                      
+                                      );
+                                    ],
+                                  );
+                                );
+                              );
+                            );
+                          );
+                          
+                          // Footer - Minimal
+                          Container(
+                            margin: const EdgeInsets.only(top: 24),
+                            child: const Text(
+                              '© 2024 Clinikx',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              );
+                            );
+                          );
+                        ],
+                      );
+                    );
+                  );
+                );
+              );
+            },
+          );
+        ),
+      ),
+    );
+  }
+}

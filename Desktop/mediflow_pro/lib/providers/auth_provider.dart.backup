@@ -1,0 +1,297 @@
+import 'package:flutter/foundation.dart';
+import 'dart:async';
+import '../models/user.dart' as ModelUser;
+import '../services/auth_service.dart';
+import '../services/notification_service.dart';
+import 'notification_provider.dart';
+
+class AuthProvider with ChangeNotifier {
+  ModelUser.User? _currentUser;
+  String? _errorMessage;
+  bool _isLoading = false;
+  bool _initialized = false;
+
+  ModelUser.User? get currentUser => _currentUser;
+  bool get isAuthenticated => _currentUser != null;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  bool get isInitialized => _initialized;
+
+  void initializeAuthListener() {
+    _isLoading = true;
+    notifyListeners();
+    
+    // Initialize auth service
+    _initializeAuthService();
+  }
+
+  Future<void> _initializeAuthService() async {
+    try {
+      await AuthService.initialize();
+      
+      // Check if user is already authenticated
+      if (AuthService.isAuthenticated) {
+        _currentUser = AuthService.currentUser;
+        // Setup notifications for existing user
+        if (_currentUser != null) {
+          await _setupUserNotifications(_currentUser!);
+        }
+      }
+      
+      _initialized = true;
+      _isLoading = false;
+      notifyListeners();
+      
+      // Set up periodic refresh
+      Timer.periodic(const Duration(minutes: 5), (timer) {
+        if (_currentUser != null) {
+          _refreshUserData();
+        }
+      });
+    } catch (e) {
+      print('Error initializing auth service: $e');
+      _errorMessage = 'Failed to initialize authentication service';
+      _initialized = true;
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _refreshUserData() async {
+    try {
+      await AuthService.refreshUser();
+      _currentUser = AuthService.currentUser;
+      notifyListeners();
+    } catch (e) {
+      print('Error refreshing user data: $e');
+      // If refresh fails, sign out
+      await signOut();
+    }
+  }
+
+  Future<bool> signIn({required String email, required String password}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final user = await AuthService.signInWithEmailAndPassword(email, password);
+      if (user != null) {
+        _currentUser = user;
+        // Setup notifications for the signed-in user
+        await _setupUserNotifications(user);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'Invalid email or password';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      print('Sign in error: $e');
+      _errorMessage = _parseAuthError(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    required String name,
+    required ModelUser.UserRole role,
+    String? hospitalId,
+    String? department,
+    String? phone,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      final user = await AuthService.signUpWithEmailAndPassword(
+        email: email,
+        password: password,
+        name: name,
+        role: role,
+        hospitalId: hospitalId,
+        department: department,
+        phone: phone,
+      );
+      
+      if (user != null) {
+        _currentUser = user;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'Sign up failed - no user returned';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      print('Sign up error: $e');
+      _errorMessage = _parseAuthError(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      // Cleanup notifications before signing out
+      if (_currentUser != null) {
+        await _cleanupUserNotifications(_currentUser!);
+      }
+      
+      await AuthService.signOut();
+      _currentUser = null;
+      _errorMessage = null;
+      notifyListeners();
+    } catch (e) {
+      print('Error during sign out: $e');
+      // Still clear local state even if backend call fails
+      _currentUser = null;
+      _errorMessage = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _setupUserNotifications(ModelUser.User user) async {
+    try {
+      final notificationProvider = NotificationProvider();
+      await notificationProvider.setupUserNotifications(user.id, user.role.toString().split('.').last);
+      print('Notifications setup for user: ${user.id}');
+    } catch (e) {
+      print('Error setting up user notifications: $e');
+    }
+  }
+
+  Future<void> _cleanupUserNotifications(ModelUser.User user) async {
+    try {
+      final notificationProvider = NotificationProvider();
+      await notificationProvider.cleanupUserNotifications(user.id);
+      print('Notifications cleaned up for user: ${user.id}');
+    } catch (e) {
+      print('Error cleaning up user notifications: $e');
+    }
+  }
+
+  void setLoading(bool loading) {
+
+  Future<bool> sendPasswordResetOtp(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      // TODO: Implement actual OTP sending logic
+      await Future.delayed(const Duration(seconds: 1));
+      
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('Send OTP error: $e');
+      _errorMessage = _parseAuthError(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+    _isLoading = loading;
+    notifyListeners();
+  }
+
+
+  String _parseAuthError(String error) {
+    // Convert error to lowercase for easier matching
+    final errorLower = error.toLowerCase();
+    
+    // Parse common authentication errors and provide user-friendly messages
+    if (error.contains('Connection refused') || error.contains('could not connect')) {
+      return 'Backend service unavailable. Please try again later.';
+    } else if (error.contains('NetworkException') || 
+        error.contains('SocketException') || 
+        error.contains('HandshakeException') ||
+        error.contains('timeout') ||
+        errorLower.contains('network')) {
+      return 'No internet connection. Please check your connection and try again.';
+    } else if (error.contains('invalid_grant') || error.contains('invalid credentials')) {
+      return 'Invalid credentials. Please check your email and password.';
+    } else if (error.contains('duplicate') || error.contains('unique constraint') || error.contains('already exists')) {
+      return 'Email already exists. Please use a different email or sign in.';
+    } else if (error.contains('password') || error.contains('weak')) {
+      return 'Password is too weak. Please use at least 6 characters.';
+    } else if (error.contains('rate limit') || error.contains('too many attempts')) {
+      return 'Too many attempts. Please try again later.';
+    } else if (error.contains('email') && error.contains('not found')) {
+      return 'Email not found. Please check your email or sign up.';
+    } else if (error.contains('database') || error.contains('server')) {
+      return 'Server error occurred. Please try again later.';
+    } else if (error.contains('525') || error.contains('502') || error.contains('503') || error.contains('504')) {
+      // Specific error codes that might indicate server issues
+      return 'Service temporarily unavailable. Please try again later.';
+    } else if (error.contains('invalid') || error.contains('format') || error.contains('input')) {
+      return 'Invalid input. Please check your information and try again.';
+    } else {
+      // For API service errors
+      if (error.contains('FormatException') || error.contains('type')) {
+        return 'Invalid data format. Please check your input.';
+      } else if (error.contains('null')) {
+        return 'Missing required information. Please fill all required fields.';
+      } else {
+        return 'Operation failed. Please check your input and try again.';
+      }
+    }
+  }
+}
+
+  Future<bool> verifyOtp(String email, String otp) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      // TODO: Implement actual OTP verification logic
+      await Future.delayed(const Duration(seconds: 1));
+      
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('OTP verification error: $e');
+      _errorMessage = _parseAuthError(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword(String email, String newPassword) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    
+    try {
+      // TODO: Implement actual password reset logic
+      await Future.delayed(const Duration(seconds: 1));
+      
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('Password reset error: $e');
+      _errorMessage = _parseAuthError(e.toString());
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+}

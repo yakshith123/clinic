@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: MediFlow Pro Backend API
+
+Parameters:
+  DatabaseUrl:
+    Type: String
+    Description: PostgreSQL database connection URL
+  SecretKey:
+    Type: String
+    Description: JWT secret key
+    NoEcho: true
+  CorsOrigins:
+    Type: String
+    Description: CORS origins (comma-separated)
+    Default: "*"
+
+Resources:
+  MediFlowApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+
+  MediFlowFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: app.main:app
+      Runtime: python3.12
+      Environment:
+        Variables:
+          DATABASE_URL: !Ref DatabaseUrl
+          SECRET_KEY: !Ref SecretKey
+          CORS_ORIGINS: !Ref CorsOrigins
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref MediFlowApi
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${MediFlowApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"

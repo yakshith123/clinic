@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MediFlow Pro Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2E7D32 0%, #60AD5E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: #2E7D32;
+            border-radius: 25px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 50px;
+        }
+        
+        h1 {
+            color: #2E7D32;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .feature {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: #2E7D32;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .feature-text h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .feature-text p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .cta-button {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background: #1B5E20;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+        }
+        
+        .stat-card {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🏥</div>
+        <h1>MediFlow Pro</h1>
+        <div class="subtitle">Smart Healthcare Management System</div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Hospitals</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">156</div>
+                <div class="stat-label">Doctors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2,847</div>
+                <div class="stat-label">Patients</div>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">📱</div>
+            <div class="feature-text">
+                <h3>Smart Queue Management</h3>
+                <p>Dual-panel system for patients and resources</p>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">📍</div>
+            <div class="feature-text">
+                <h3>Proximity Engine</h3>
+                <p>Location-based notifications and alerts</p>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">🧾</div>
+            <div class="feature-text">
+                <h3>QR Check-in</h3>
+                <p>Seamless contactless registration system</p>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">🔔</div>
+            <div class="feature-text">
+                <h3>Real-time Notifications</h3>
+                <p>Instant alerts via Firebase messaging</p>
+            </div>
+        </div>
+        
+        <button class="cta-button" onclick="showDemo()">View Interactive Demo</button>
+    </div>
+
+    <script>
+        function showDemo() {
+            alert('🏥 MediFlow Pro Demo\n\nKey Features:\n• Admin Dashboard - Hospital management\n• Doctor Panel - Dual-queue system\n• Patient App - QR check-in & notifications\n• Resource Management - Equipment scheduling\n\nThe full Flutter application is ready for deployment!');
+        }
+        
+        // Add some animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.8s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

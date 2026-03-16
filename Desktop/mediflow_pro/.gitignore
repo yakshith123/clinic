@@ -1,0 +1,88 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Pods/
+android/.gradle/
+android/app/build/
+android/build/
+*.iml
+**/android/**/*.iml
+**/ios/**/*.iml
+**/linux/**/*.iml
+**/macos/**/*.iml
+**/windows/**/*.iml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+*.egg-info/
+dist/
+eggs/
+
+# Node.js (for qr code folder)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# Secrets and credentials
+firebase-credentials.json
+google-services.json
+**/credentials.json
+**/service_account.json
+
+# Build outputs
+build_apk/
+*.apk
+*.aab
+*.ipa
+
+# Test artifacts
+.coverage
+htmlcov/
+.pytest_cache/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

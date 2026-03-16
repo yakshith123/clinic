@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediFlow Pro - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2E7D32 0%, #60AD5E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2E7D32;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .app-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .login-screen {
+            padding: 30px;
+        }
+
+        .login-title {
+            text-align: center;
+            color: #2E7D32;
+            font-size: 24px;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #2E7D32;
+            border-radius: 12px;
+            background: white;
+            color: #2E7D32;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-btn:hover {
+            background: #2E7D32;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .role-btn.active {
+            background: #2E7D32;
+            color: white;
+        }
+
+        .credentials {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .cred-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .cred-item {
+            font-family: monospace;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #2E7D32;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: #1B5E20;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        }
+
+        .dashboard {
+            display: none;
+            padding: 25px;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .user-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: #2E7D32;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+        }
+
+        .user-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-role {
+            color: #2E7D32;
+            font-weight: 600;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .dashboard-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 15px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .feature-highlight {
+            background: #e8f5e8;
+            border-left: 4px solid #2E7D32;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #2E7D32;
+            margin-bottom: 5px;
+        }
+
+        .feature-desc {
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .role-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">🏥</div>
+            <div class="app-title">MediFlow Pro</div>
+            <div class="app-subtitle">Smart Healthcare Management</div>
+        </div>
+
+        <div class="login-screen" id="loginScreen">
+            <div class="login-title">Welcome Back</div>
+            
+            <div class="role-selector">
+                <button class="role-btn active" onclick="selectRole('admin')">Admin</button>
+                <button class="role-btn" onclick="selectRole('doctor')">Doctor</button>
+                <button class="role-btn" onclick="selectRole('patient')">Patient</button>
+            </div>
+
+            <div class="credentials">
+                <div class="cred-title">Demo Credentials:</div>
+                <div class="cred-item" id="credDisplay">admin@hospital.com / admin123</div>
+            </div>
+
+            <button class="login-btn" onclick="login()">Sign In</button>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div class="dashboard" id="adminDashboard">
+            <div class="user-header">
+                <div class="user-avatar">👤</div>
+                <div class="user-name">Hospital Administrator</div>
+                <div class="user-role">Administrator</div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="showFeature('hospitals')">
+                    <div class="card-icon">🏥</div>
+                    <div class="card-title">Hospitals</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('users')">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Users</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('analytics')">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Analytics</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('settings')">
+                    <div class="card-icon">⚙️</div>
+                    <div class="card-title">Settings</div>
+                </div>
+            </div>
+
+            <div class="feature-highlight">
+                <div class="feature-title">🏥 Hospital Management</div>
+                <div class="feature-desc">Manage multiple facilities and staff across your healthcare network</div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Doctor Dashboard -->
+        <div class="dashboard" id="doctorDashboard">
+            <div class="user-header">
+                <div class="user-avatar">👨‍⚕️</div>
+                <div class="user-name">Dr. Sarah Johnson</div>
+                <div class="user-role">Cardiologist</div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="showFeature('patients')">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Patients</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('resources')">
+                    <div class="card-icon">🛠️</div>
+                    <div class="card-title">Resources</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('schedule')">
+                    <div class="card-icon">📅</div>
+                    <div class="card-title">Schedule</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('start')">
+                    <div class="card-icon">▶️</div>
+                    <div class="card-title">Start Session</div>
+                </div>
+            </div>
+
+            <div class="feature-highlight">
+                <div class="feature-title">📋 Dual-Queue System</div>
+                <div class="feature-desc">Manage patient appointments and resource consultations simultaneously</div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Patient Dashboard -->
+        <div class="dashboard" id="patientDashboard">
+            <div class="user-header">
+                <div class="user-avatar">👤</div>
+                <div class="user-name">John Smith</div>
+                <div class="user-role">Patient</div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="showFeature('appointments')">
+                    <div class="card-icon">📅</div>
+                    <div class="card-title">Appointments</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('checkin')">
+                    <div class="card-icon">📱</div>
+                    <div class="card-title">Check-in</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('notifications')">
+                    <div class="card-icon">🔔</div>
+                    <div class="card-title">Notifications</div>
+                </div>
+                <div class="dashboard-card" onclick="showFeature('records')">
+                    <div class="card-icon">📋</div>
+                    <div class="card-title">Records</div>
+                </div>
+            </div>
+
+            <div class="feature-highlight">
+                <div class="feature-title">📍 Smart Proximity Engine</div>
+                <div class="feature-desc">Wait in your car or cafe until the doctor calls you - no more waiting rooms!</div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        let currentRole = 'admin';
+
+        function selectRole(role) {
+            currentRole = role;
+            
+            // Update button states
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update credentials display
+            const credDisplay = document.getElementById('credDisplay');
+            switch(role) {
+                case 'admin':
+                    credDisplay.textContent = 'admin@hospital.com / admin123';
+                    break;
+                case 'doctor':
+                    credDisplay.textContent = 'doctor@hospital.com / doctor123';
+                    break;
+                case 'patient':
+                    credDisplay.textContent = 'patient@gmail.com / patient123';
+                    break;
+            }
+        }
+
+        function login() {
+            // Hide login screen
+            document.getElementById('loginScreen').style.display = 'none';
+            
+            // Show appropriate dashboard
+            switch(currentRole) {
+                case 'admin':
+                    document.getElementById('adminDashboard').classList.add('active');
+                    break;
+                case 'doctor':
+                    document.getElementById('doctorDashboard').classList.add('active');
+                    break;
+                case 'patient':
+                    document.getElementById('patientDashboard').classList.add('active');
+                    break;
+            }
+        }
+
+        function logout() {
+            // Hide all dashboards
+            document.querySelectorAll('.dashboard').forEach(dashboard => {
+                dashboard.classList.remove('active');
+            });
+            
+            // Show login screen
+            document.getElementById('loginScreen').style.display = 'block';
+        }
+
+        function showFeature(feature) {
+            let message = '';
+            
+            switch(feature) {
+                case 'hospitals':
+                    message = '🏥 Hospital Management\n\n• Add/remove facilities\n• Monitor performance metrics\n• Manage staff assignments\n• Track patient capacity';
+                    break;
+                case 'users':
+                    message = '👥 User Management\n\n• Onboard new doctors and staff\n• Manage user permissions\n• Monitor activity logs\n• Handle account approvals';
+                    break;
+                case 'analytics':
+                    message = '📊 Analytics Dashboard\n\n• Real-time system metrics\n• Appointment statistics\n• Resource utilization reports\n• Performance insights';
+                    break;
+                case 'patients':
+                    message = '👥 Patient Queue Management\n\n• View current patient queue\n• Monitor wait times\n• Track appointment status\n• Manage emergency cases';
+                    break;
+                case 'resources':
+                    message = '🛠️ Resource Scheduling\n\n• Equipment consultation bookings\n• Specialist appointments\n• Resource approval workflow\n• Integration with patient schedule';
+                    break;
+                case 'schedule':
+                    message = '📅 Schedule Management\n\n• View daily appointments\n• Manage time slots\n• Handle rescheduling\n• Emergency appointment handling';
+                    break;
+                case 'start':
+                    message = '▶️ Session Control\n\n• Start/stop consultation sessions\n• Automatic queue notifications\n• Real-time queue management\n• Patient calling system';
+                    break;
+                case 'appointments':
+                    message = '📅 Appointment Management\n\n• Book new appointments\n• View upcoming visits\n• Cancel/reschedule options\n• Appointment history';
+                    break;
+                case 'checkin':
+                    message = '📱 QR Check-in System\n\n• Scan hospital QR codes\n• Generate personal check-in codes\n• Location-based check-in\n• Contactless registration';
+                    break;
+                case 'notifications':
+                    message = '🔔 Smart Notifications\n\n• Proximity-based alerts\n• Appointment reminders\n• Doctor ready notifications\n• Emergency alerts';
+                    break;
+                case 'records':
+                    message = '📋 Medical Records\n\n• Access personal health records\n• View test results\n• Medical history\n• Prescription information';
+                    break;
+                default:
+                    message = 'Feature details would appear here in the full application';
+            }
+            
+            alert(message);
+        }
+
+        // Add some animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.app-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.8s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

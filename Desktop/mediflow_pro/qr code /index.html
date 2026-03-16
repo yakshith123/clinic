@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Registration System</title>
+    <script>
+      // Redirect to appropriate HTML file based on URL path
+      (function() {
+        const path = window.location.pathname;
+        const search = window.location.search;
+        
+        if (path === '/register' || path.startsWith('/register?') || path === '/register.html') {
+          // Already on register page, don't redirect
+          return;
+        }
+        if (path === '/mr-register' || path.startsWith('/mr-register?') || path === '/mr-register.html') {
+          // Already on MR page, don't redirect
+          return;
+        }
+        
+        // Check if we should redirect from root path with query params
+        if (path === '/' && search) {
+          if (search.includes('clinic=') && !search.includes('mr-')) {
+            // This is a patient registration URL
+            window.location.href = '/register.html' + search;
+            return;
+          }
+          if (search.includes('mr-register')) {
+            // This is an MR registration URL  
+            window.location.href = '/mr-register.html' + search;
+            return;
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
