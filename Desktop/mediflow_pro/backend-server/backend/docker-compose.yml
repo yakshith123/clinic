@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/mediflow_db
+      - SECRET_KEY=your-super-secret-key-change-this-in-production
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+    depends_on:
+      - db
+    volumes:
+      - ./app:/app/app
+    command: >
+      sh -c "
+        python add_google_columns.py &&
+        python make_password_hash_nullable.py &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+      "
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=mediflow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

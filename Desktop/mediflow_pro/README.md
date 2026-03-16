@@ -1,36 +1,70 @@
-# MediFlow Pro - Smart Healthcare Queue & Resource Management System
+# MediFlow Pro - Complete Healthcare Management System
 
-## Overview
-MediFlow Pro is an innovative mobile application built on Flutter designed to eliminate hospital waiting room congestion and streamline professional medical visits. By utilizing real-time location data and a dual-panel management system, the app ensures that both patients and medical consultants arrive at the facility only when the doctor is ready to receive them.
+## 🏥 Overview
+MediFlow Pro is a comprehensive healthcare management platform that combines mobile applications (Flutter), backend APIs (FastAPI), and web-based QR registration to eliminate hospital waiting room congestion and streamline medical facility operations. The system features real-time location tracking, dual-panel management, and smart queuing to ensure patients and medical staff arrive only when needed.
 
-## Key Features
+## ✨ Key Features
 
 ### 🏥 **Dual-Panel Management System**
 - **Admin Panel**: Hospital management, staff onboarding, facility oversight
 - **Doctor Panel**: Dual-queue dashboard for patients and resources
 - **Patient/Consultant Panel**: QR check-in, appointment management
 
-### 📍 **Smart Proximity Engine**
+### 🎯 **Web Application - QR Registration System**
+- **Vite + React**: Modern web-based QR code registration
+- **Patient Self-Registration**: Generate personal QR codes for hospital check-ins
+- **Hospital QR Display**: Facilities can display QR codes for easy patient scanning
+- **Responsive Design**: Tailwind CSS for mobile-first responsive UI
+- **Real-time Processing**: Instant QR code generation and validation
 - Real-time location tracking with Google Maps integration
 - Distance-based notification system
 - QR code check-in functionality
 - Smart queuing with predictive alerting
 
-### 📱 **Core Functionality**
+### 📍 **Smart Proximity & Location Engine**
 - **Queue Management**: Separate queues for patients and resources
 - **Session Control**: One-touch "Start Session" for doctors
 - **Resource Scheduling**: Equipment and consultant coordination
 - **Real-time Notifications**: Push notifications via Firebase
 - **Location Services**: Geolocation for proximity-based alerts
 
-## Technical Architecture
+### 📱 **Mobile App Features**
 
-### Frontend
-- **Framework**: Flutter (Cross-platform iOS/Android)
-- **State Management**: Provider pattern
-- **UI Components**: Material Design 3
-- **Maps**: Google Maps Flutter
-- **QR Code**: qr_flutter & mobile_scanner
+## 🏗️ Technical Architecture
+
+### Mobile App (Flutter)
+### Backend API (FastAPI + Python)
+- **Framework**: FastAPI with async support
+- **Database**: PostgreSQL / Firebase Firestore
+- **Authentication**: JWT tokens + Firebase Auth
+- **API Documentation**: Auto-generated OpenAPI/Swagger docs
+- **Real-time**: WebSocket support for live updates
+
+### Web App (React + Vite)
+### Web App (React + Vite)
+- **Framework**: React 18 with Vite
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite for fast development and production builds
+- **QR Libraries**: qrcode.react for generation, html5-qrcode for scanning
+- **State Management**: React Context API
+
+### Mobile App State Management
+### Mobile App State Management
+- **Pattern**: Provider pattern with ChangeNotifier
+- **Authentication**: Firebase Authentication integration
+- **Authentication**: Firebase Authentication integration
+- **Maps Integration**: Google Maps Flutter package
+- **QR Scanning**: mobile_scanner & qr_flutter packages
+
+### Backend Services (FastAPI)
+### Backend Services (FastAPI)
+- **Routers**: Modular API endpoints (auth, appointments, clinics, doctors, queue, etc.)
+- **Models**: SQLAlchemy ORM models for database operations
+- **Schemas**: Pydantic models for request/response validation
+- **Services**: Email and SMS notification services
+- **Security**: JWT token authentication and password hashing
+
+### Cloud & Deployment
 
 ### Backend
 - **Authentication**: Firebase Authentication
@@ -39,8 +73,23 @@ MediFlow Pro is an innovative mobile application built on Flutter designed to el
 - **Storage**: Firebase Storage
 - **Location**: Geolocator package
 
-### Key Services
-1. **FirebaseService** - Authentication and data management
+### Cloud & Deployment
+- **Containerization**: Docker support for all components
+- **Orchestration**: Docker Compose for local development
+- **Cloud Ready**: AWS Elastic Beanstalk, Render deployment configs
+- **CI/CD**: Deployment scripts included
+
+### Key Mobile Services
+### Key Mobile Services
+1. **FirebaseService** - Authentication and real-time database operations
+2. **LocationService** - Geolocation tracking and distance calculations
+3. **NotificationService** - Push notifications via FCM
+4. **QueueProvider** - Queue management and state handling
+5. **QRService** - QR code generation and scanning
+6. **API Service** - REST API communication with backend
+7. **LocalStorageService** - Offline data persistence
+
+### Key Backend Routers
 2. **LocationService** - Geolocation and distance calculations
 3. **NotificationService** - Push and local notifications
 4. **QueueProvider** - Queue management logic
